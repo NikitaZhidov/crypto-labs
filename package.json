@@ -1,0 +1,23 @@
+{
+  "name": "crypto-labs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate-prime.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NikitaZhidov/crypto-labs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NikitaZhidov/crypto-labs/issues"
+  },
+  "homepage": "https://github.com/NikitaZhidov/crypto-labs#readme",
+  "dependencies": {
+    "random-bigint": "0.0.1"
+  }
+}

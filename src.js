@@ -1,13 +1,20 @@
 // src.js
 
-function RSA(n) {
+const random = require('random-bigint');
+
+function randomIntFromInterval(min, max) {
+    const int = Math.floor(Math.random() * (max - min + 1) + min)
+    return BigInt(int);
+}
+
+function RSA(N) {
 
     let p, q
     do {
-        p = generatePrime(n);
-        q = generatePrime(n);
+        p = generatePrime(N);
+        q = generatePrime(N);
     } while (p == q)
-    
+
     const f = (p - 1)*(q - 1);
     var e = 1;
 
@@ -39,11 +46,13 @@ function decryptRSA(cmsg, d, p, q, n) {
     return msg;
 }
 
-function generatePrime(n) {
+function generatePrime(maxBits) {
+    let n;
     do {
-        n = someRandom(n/2);
+        n = random(maxBits);
         n = 2n * n - 1n;
     } while (!isPrime(n))
+
     return n;
 }
 
@@ -62,47 +71,57 @@ function isPrime(n) {
         }
     }
 
-    const r = 15;
+    const r = 20;
     return rabinMiller(n, r);
 }
 
 function rabinMiller(n, r) {
-    let b = n - 1;
+    let b = n - 1n;
     let k = -1;
     let binary = [];
 
     do {
         k += 1;
-        binary.push(b % 2);
-        b /= 2;
-    } while (b > 0)
+        binary.push(b % 2n);
+        b /= 2n;
+    } while (b > 0n)
 
     for (let j = 0; j < r; j++) {
-        a = someRandom(2, n - 1);
+        a = randomIntFromInterval(2, Number.MAX_VALUE);
         let euclid = extendedEuclid(a, n);
-        if (euclid[0] > 1)
+
+        if (euclid[0] > 1n)
             return false;
-        
-        let d = 1
+
+        let d = 1n;
+
         for (let i = k; i < 0; i--) {
-            const x = d;
+            let x = d;
+
             d = (d * d) % n;
 
-            if ((d == 1) && (x != 1) && (x != (n - 1)))
+            if ((d == 1) && (x != 1n) && (x != (n - 1n)))
                 return false;
-            if (binary[i] == 1)
+            if (binary[i] == 1n) {
                 d = (d * a) % n;
+                if (d < 0n)
+                    d += n;
+            }
         }
 
-        return (d == 1);
+        if (d != 1) {
+            return false;
+        }
     }
+
+    return true;
 }
 
 function modExp(a, b, n) {
     let x;
     if (b == 0)
         return 1;
-    
+
     if (b % 2 == 0) {
         x = modExp(a, b/2, n);
         return (x * x) % n;
@@ -114,13 +133,21 @@ function modExp(a, b, n) {
 }
 
 function extendedEuclid(a, b) {
-    if (b == 0)
-        return [a, 1, 0];
+    if (b == 0n)
+        return [a, 1n, 0n];
 
     let d, xm, ym;
-    const [d, xm, ym] = extendedEuclid(b, a % b);
-    
+    [d, xm, ym] = extendedEuclid(b, a % b);
+
     const x = ym;
-    const y = xm - (a/b) * y;
+    const y = xm - (a/b) * ym;
     return [d, x, y];
 }
+
+for (let i = 0; i < 20; i++) {
+    const x = generatePrime(40);
+    console.log(`x: ${x}`);
+}
+
+// rabinMiller(140301226213n, 20);
+// console.log(extendedEuclid(2953n, 140301226213n));
