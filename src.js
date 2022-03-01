@@ -15,25 +15,25 @@ function RSA(N) {
         q = generatePrime(N);
     } while (p == q)
 
-    const f = (p - 1)*(q - 1);
-    var e = 1;
+    const f = (p - 1n)*(q - 1n);
+    var e = 1n;
 
     let t, x, y;
     do {
-        e += 2;
+        e += 2n;
         [t, x, y] = extendedEuclid(e, f);
-    } while (t > 1)
+    } while (t > 1n)
 
     const n = p * q;
-    const d = x % f;
+    const d = (x < 0n ? x + f : x) % f;
 
-    const answer = [e, d, n];
+    const answer = [e, d, n, p, q];
     return answer;
 }
 
 function decryptRSA(cmsg, d, p, q, n) {
-    d1 = d % (p - 1);
-    d2 = d % (q - 1);
+    d1 = d % (p - 1n);
+    d2 = d % (q - 1n);
 
     m1 = modExp(cmsg, d1, p);
     m2 = modExp(cmsg, d2, q);
@@ -41,7 +41,7 @@ function decryptRSA(cmsg, d, p, q, n) {
     let t, x, y;
     [t, x, y] = extendedEuclid(q, p);
 
-    r = x % p;
+    r = (x < 0n ? x + p : x) % p;
     msg = (((m1 - m2) * r) % p) * q + m2;
     return msg;
 }
@@ -93,9 +93,9 @@ function rabinMiller(n, r) {
         if (euclid[0] > 1n)
             return false;
 
-        let d = 1n;
+        var d = 1n;
 
-        for (let i = k; i < 0; i--) {
+        for (let i = k; i >= 0; i--) {
             let x = d;
 
             d = (d * d) % n;
@@ -104,8 +104,6 @@ function rabinMiller(n, r) {
                 return false;
             if (binary[i] == 1n) {
                 d = (d * a) % n;
-                if (d < 0n)
-                    d += n;
             }
         }
 
@@ -119,15 +117,15 @@ function rabinMiller(n, r) {
 
 function modExp(a, b, n) {
     let x;
-    if (b == 0)
-        return 1;
+    if (b == 0n)
+        return 1n;
 
-    if (b % 2 == 0) {
-        x = modExp(a, b/2, n);
+    if (b % 2n == 0n) {
+        x = modExp(a, b/2n, n);
         return (x * x) % n;
     }
 
-    x = modExp(a, (b - 1)/2, n);
+    x = modExp(a, (b - 1n)/2n, n);
     x = (x * x) % n;
     return (a * x) % n;
 }
@@ -144,10 +142,19 @@ function extendedEuclid(a, b) {
     return [d, x, y];
 }
 
-for (let i = 0; i < 20; i++) {
-    const x = generatePrime(40);
-    console.log(`x: ${x}`);
+function main(message) {
+    const [e, d, n, p ,q] = RSA(100);
+    console.log('Открытый ключ:', e, 'и', n);
+    console.log('Закрытый ключ:', d, 'и', n);
+
+    const signature = modExp(BigInt(message), d, n);
+    console.log('Цифровая подпись:', signature);
+
+    const approval = Number(decryptRSA(signature, e, p, q, n));
+    if (approval == message)
+        console.log(`Все ок, подпись валидна! Сообщение: ${approval}.`);
+    else
+        console.log('Исправляйте алгоритм');
 }
 
-// rabinMiller(140301226213n, 20);
-// console.log(extendedEuclid(2953n, 140301226213n));
+main(123345);
