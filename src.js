@@ -157,4 +157,19 @@ function main(message) {
         console.log('Исправляйте алгоритм');
 }
 
-main(123345);
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout,
+})
+
+readline.question('Введите сообщение (число): ', (msg) => {
+    if (isNaN(msg)) {
+        console.warn('Введены некорректные данные');
+        process.exit();
+    }
+
+    const msgNum = Number(msg);
+    main(msgNum);
+    process.exit();
+})
+
