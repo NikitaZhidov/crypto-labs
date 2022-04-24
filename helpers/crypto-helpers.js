@@ -89,7 +89,6 @@ function randomIntFromInterval(min, max) {
     return BigInt(int);
 }
 
-
 function extendedEuclid(a, b) {
     if (b == 0n)
         return [a, 1n, 0n];
@@ -102,6 +101,21 @@ function extendedEuclid(a, b) {
     return [d, x, y];
 }
 
+function getCountBitsOfNumber (number) {
+    let count = 0;
+    while (number > 0n) {
+        number = number >> 1n;
+        count++;
+    }
+    return count;
+}
+
+function getRandomBigInt (bigIntMax) {
+    const maxValueBits = getCountBitsOfNumber(bigIntMax);
+
+    return random(maxValueBits);
+}
+
 module.exports = {
 	extendedEuclid,
 	randomIntFromInterval,
@@ -109,4 +123,6 @@ module.exports = {
 	rabinMiller,
 	isPrime,
 	generatePrime,
+    getCountBitsOfNumber,
+    getRandomBigInt,
 }

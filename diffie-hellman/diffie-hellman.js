@@ -1,14 +1,5 @@
 const random = require('random-bigint');
-const { generatePrime, isPrime, modExp } = require('../helpers/crypto-helpers');
-
- const getCountBitsOfNumber = (number) => {
-    let count = 0;
-    while (number > 0n) {
-        number = number >> 1n;
-        count++;
-    }
-    return count;
-}
+const { generatePrime, isPrime, modExp, getCountBitsOfNumber } = require('../helpers/crypto-helpers');
 
 function generateG(upperLimit) {
     let g, n, p, q;
