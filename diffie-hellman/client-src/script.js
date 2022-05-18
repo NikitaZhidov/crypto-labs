@@ -48,7 +48,6 @@ function initChatView() {
 
 function initNoChatView() {
 	if (form$) {
-		form$.removeEventListener('submit', formSubmitListener);
 		document.body.innerHTML = `<h1 style="display: flex; justify-content: center; align-items: center; height: 100vh;">Wait for a partner to connect...</h1>;`;
 	}
 }
@@ -86,7 +85,7 @@ function createFirstStageKey() {
 	const { p, q, g } = cryptoParams;
 	const pBits = getCountBitsOfNumber(p);
 
-	cryptoParams.x = rnd(pBits);
+	cryptoParams.x = rnd(pBits - 1);
 
 	console.log('x', cryptoParams.x);
 
