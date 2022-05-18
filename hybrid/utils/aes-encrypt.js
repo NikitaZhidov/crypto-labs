@@ -1,6 +1,3 @@
-const { HEX_BLOCKS_DELIMITER } = require('../constants');
-const { getStringBlocks } = require('./blocks');
-
 const { getRandomInt } = require('../../helpers/crypto-helpers');
 const fs = require('fs');
 
@@ -12,6 +9,7 @@ const AES_KEY_TYPE = {
 
 const aesjs = require('aes-js');
 const sha256 = require('sha256');
+const { convertToMultipleOf16Bytes } = require('./utils');
 
 const generateAesKeyAndInitVector = (type = AES_KEY_TYPE.k128) => {
 	let arrayLength = 16;
@@ -40,54 +38,38 @@ const generateAesKeyAndInitVector = (type = AES_KEY_TYPE.k128) => {
 	return [new Uint8Array(targetArr), new Uint8Array(initVector)];
 };
 
-const getAesEncryptedHexWithDelimiter = (
-	aesSession,
-	content,
-	delimiter = HEX_BLOCKS_DELIMITER
-) => {
-	const encryptedBytesBlocks = getStringBlocks(content, 16).map((block) => {
-		return aesSession.encrypt(aesjs.utils.utf8.toBytes(block));
-	});
+const getAesEncryptedHex = (aesSession, content) => {
+	const correctContent = convertToMultipleOf16Bytes(content);
 
-	const encryptedHexWithDelimiter = encryptedBytesBlocks
-		.map((bytesBlock) => {
-			return aesjs.utils.hex.fromBytes(bytesBlock);
-		})
-		.join(delimiter);
+	const encryptedBytes = aesSession.encrypt(
+		aesjs.utils.utf8.toBytes(correctContent)
+	);
 
-	return encryptedHexWithDelimiter;
+	const encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
+
+	return encryptedHex;
 };
 
 const getAesDecryptedFileContent = (
-	encryptedFileContentHexWithDelimiter,
-	[aesKeyArr, initVectorArr],
-	delimiter = HEX_BLOCKS_DELIMITER
+	encryptedFileContentHex,
+	[aesKeyArr, initVectorArr]
 ) => {
 	const aesSessionCBC = new aesjs.ModeOfOperation.cbc(aesKeyArr, initVectorArr);
 
-	const decryptedContentBlocks = encryptedFileContentHexWithDelimiter
-		.split(delimiter)
-		.map((hexBlock) => {
-			const bytes = aesjs.utils.hex.toBytes(hexBlock);
-			const decryptedBytes = aesSessionCBC.decrypt(bytes);
+	const encryptedBytes = aesjs.utils.hex.toBytes(encryptedFileContentHex);
+	const decryptedBytes = aesSessionCBC.decrypt(encryptedBytes);
 
-			return aesjs.utils.utf8.fromBytes(decryptedBytes);
-		});
-
-	return decryptedContentBlocks.join('');
+	return aesjs.utils.utf8.fromBytes(decryptedBytes);
 };
 
 const getDecryptedFileContentByPassword = (pathToFile, password) => {
-	const encryptedFileContentHexWithDelimiter = fs
-		.readFileSync(pathToFile)
-		.toString();
+	const encryptedFileContentHex = fs.readFileSync(pathToFile).toString();
 
 	const [sessionKeyArr, initVectorArr] = getAesKeyFromPassword(password);
 
 	const decryptedFileContent = getAesDecryptedFileContent(
-		encryptedFileContentHexWithDelimiter,
-		[sessionKeyArr, initVectorArr],
-		HEX_BLOCKS_DELIMITER
+		encryptedFileContentHex,
+		[sessionKeyArr, initVectorArr]
 	).trim();
 
 	return decryptedFileContent;
@@ -126,7 +108,7 @@ const getAesKeyFromPassword = (password, aesKeyType = AES_KEY_TYPE.k128) => {
 };
 
 module.exports = {
-	getAesEncryptedHexWithDelimiter,
+	getAesEncryptedHex,
 	getDecryptedFileContentByPassword,
 	getAesDecryptedFileContent,
 	generateAesKeyAndInitVector,

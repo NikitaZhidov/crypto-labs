@@ -1,13 +1,9 @@
-const { RSA_FORMAT, HEX_BLOCKS_DELIMITER } = require('../constants');
+const { RSA_FORMAT } = require('../constants');
 
 const Rsa = require('node-rsa');
 const fs = require('fs');
 const aesjs = require('aes-js');
-const sha256 = require('sha256');
-const {
-	getAesKeyFromPassword,
-	getAesEncryptedHexWithDelimiter,
-} = require('./aes-encrypt');
+const { getAesKeyFromPassword, getAesEncryptedHex } = require('./aes-encrypt');
 
 const generateRsaKeys = (pathToPublic, pathToPrivate, privateKeyPassword) => {
 	const key = new Rsa({ b: 512 });
@@ -24,14 +20,10 @@ const generateRsaKeys = (pathToPublic, pathToPrivate, privateKeyPassword) => {
 
 	const privateKey = key.exportKey(`${RSA_FORMAT}-private`);
 
-	const encryptedPrivateKeyHexWithDelimiter = getAesEncryptedHexWithDelimiter(
-		aesSession,
-		privateKey,
-		HEX_BLOCKS_DELIMITER
-	);
+	const encryptedPrivateKeyHex = getAesEncryptedHex(aesSession, privateKey);
 
 	fs.writeFileSync(pathToPublic, publicKey);
-	fs.writeFileSync(pathToPrivate, encryptedPrivateKeyHexWithDelimiter);
+	fs.writeFileSync(pathToPrivate, encryptedPrivateKeyHex);
 
 	return key;
 };

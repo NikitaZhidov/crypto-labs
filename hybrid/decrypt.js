@@ -2,7 +2,6 @@ const {
 	PATH_TO_PRIVATE_RSA,
 	RSA_FORMAT,
 	PATH_TO_SESSION_KEY,
-	HEX_BLOCKS_DELIMITER,
 	PATH_TO_PUBLIC_SIGNATURE,
 	PATH_TO_SIGNATURE_CONTENT,
 } = require('./constants');
@@ -99,14 +98,12 @@ const main = (filename, password) => {
 	const sessionKeyArr = aesjs.utils.hex.toBytes(sessionKeyHexString);
 	const initVectorArr = aesjs.utils.hex.toBytes(initVectorHexString);
 
-	const encryptedFileContentHexWithDelimiter =
-		readEncryptedFileContent(filename);
+	const encryptedFileContentHex = readEncryptedFileContent(filename);
 
-	const fileContent = getAesDecryptedFileContent(
-		encryptedFileContentHexWithDelimiter,
-		[sessionKeyArr, initVectorArr],
-		HEX_BLOCKS_DELIMITER
-	);
+	const fileContent = getAesDecryptedFileContent(encryptedFileContentHex, [
+		sessionKeyArr,
+		initVectorArr,
+	]);
 
 	const contentHash = sha256(fileContent.trim());
 

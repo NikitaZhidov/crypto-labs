@@ -12,13 +12,12 @@ const {
 	PATH_TO_PUBLIC_RSA,
 	RSA_FORMAT,
 	PATH_TO_SESSION_KEY,
-	HEX_BLOCKS_DELIMITER,
 	PATH_TO_PRIVATE_SIGNATURE,
 	PATH_TO_SIGNATURE_CONTENT,
 } = require('./constants');
 
 const {
-	getAesEncryptedHexWithDelimiter,
+	getAesEncryptedHex,
 	generateAesKeyAndInitVector,
 	getDecryptedFileContentByPassword,
 } = require('./utils/aes-encrypt');
@@ -98,11 +97,7 @@ const main = (filename, signaturePrivateKeyPass) => {
 		initVectorArr
 	);
 
-	const encryptedContent = getAesEncryptedHexWithDelimiter(
-		aesSessionCBC,
-		content,
-		HEX_BLOCKS_DELIMITER
-	);
+	const encryptedContent = getAesEncryptedHex(aesSessionCBC, content);
 
 	writeEncryptedFile(encryptedContent, filename);
 };
